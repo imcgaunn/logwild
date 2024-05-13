@@ -1,8 +1,11 @@
 module mcgaunn.com/logwild
 
-go 1.21.6
+go 1.22
+
+toolchain go1.22.3
 
 require (
+	github.com/brianvoe/gofakeit/v7 v7.0.3
 	github.com/gorilla/mux v1.8.1
 	github.com/prometheus/client_golang v1.18.0
 	github.com/spf13/cobra v1.8.0
