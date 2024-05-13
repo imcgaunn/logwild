@@ -16,10 +16,10 @@ func NewWithDefaults() LogMakerConfig {
 	}
 }
 
-func (cfg *LogMakerConfig) StartWriting(*io.Writer w) error {
-  return nil
+func (cfg *LogMakerConfig) StartWriting(w io.Writer) error {
+	return nil
 }
 
-func (*LogMakerConfig cfg) StopWritingLogs() error {
-  return nil
+func (cfg *LogMakerConfig) StopWritingLogs(donech chan int) error {
+	return nil
 }
