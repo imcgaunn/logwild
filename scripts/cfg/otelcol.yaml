@@ -1,0 +1,55 @@
+extensions:
+  health_check:
+  pprof:
+    endpoint: :1888
+  memory_ballast:
+    size_mib: 512
+  zpages:
+    endpoint: :55679
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: :4317
+
+  filelog:
+    include:
+      - /var/log/syslog
+
+processors:
+  batch:
+  memory_limiter:
+    # 75% of maximum memory up to 4G
+    limit_mib: 1536
+    # 25% of limit up to 2G
+    spike_limit_mib: 512
+    check_interval: 5s
+
+exporters:
+  debug:
+  prometheus:
+    endpoint: :8889
+  otlp/openobserve:
+    endpoint: ianpod-openobserve:5081
+    headers:
+      Authorization: "Basic cm9vdEBleGFtcGxlLmNvbTpvUTRXdHRYWDlFTG1TRjdq"
+      organization: default
+      stream-name: default
+    tls:
+      insecure: true
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug, otlp/openobserve]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug, otlp/openobserve]
+    logs:
+      receivers: [filelog]
+      exporters: [debug, otlp/openobserve]
+
+  extensions: [pprof, health_check, zpages]
