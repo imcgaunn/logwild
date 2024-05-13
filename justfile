@@ -5,7 +5,7 @@ set dotenv-load := true
 
 DOCKER_REPOSITORY := "wot"
 TAG := `echo ${TAG:=latest}`
-NAME := "ianpod"
+NAME := "logwild"
 GIT_COMMIT := `git describe --dirty --always`
 VERSION := `grep 'VERSION' pkg/version/version.go | awk '{ print $4 }' | tr -d '"'`
 # default to no extra run args, but allow them to be supplied in env
@@ -20,8 +20,8 @@ help :
   @just --list
 
 build :
-  CGO_ENABLED=0 go build -ldflags "-s -w -X mcgaunn.com/iankubetrace/pkg/version.REVISION={{ GIT_COMMIT }}" \
-    -a -o ./bin/ianpod ./cmd/ianpod/*
+  CGO_ENABLED=0 go build -ldflags "-s -w -X mcgaunn.com/logwild/pkg/version.REVISION={{ GIT_COMMIT }}" \
+    -a -o ./bin/logwild ./cmd/ianpod/*
 
 build-container :
   @echo "this should build docker container"
@@ -52,8 +52,8 @@ release:
   git push alert {{ VERSION }}
 
 run :
-  go run -ldflags "-s -w -X mcgaunn.com/iankubetrace/pkg/version.REVISION={{ GIT_COMMIT }}" \
-    cmd/ianpod/* --debug run {{ EXTRA_RUN_ARGS }}
+  go run -ldflags "-s -w -X mcgaunn.com/logwild/pkg/version.REVISION={{ GIT_COMMIT }}" \
+    cmd/logwild/* --debug run {{ EXTRA_RUN_ARGS }}
 
 fmt :
   gofmt -l -s -w ./
@@ -72,7 +72,7 @@ test :
 # to collector
 run-app :
   OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:44317 \
-    bin/ianpod \
+    bin/logwild \
     --debug \
     --port-metrics 8889 \
     --port 8888 \

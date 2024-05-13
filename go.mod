@@ -1,4 +1,4 @@
-module mcgaunn.com/iankubetrace
+module mcgaunn.com/logwild
 
 go 1.21.6
 

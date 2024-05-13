@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"mcgaunn.com/iankubetrace/pkg/cmd/run"
-	"mcgaunn.com/iankubetrace/pkg/cmd/version"
-	ver "mcgaunn.com/iankubetrace/pkg/version"
+	"mcgaunn.com/logwild/pkg/cmd/run"
+	"mcgaunn.com/logwild/pkg/cmd/version"
+	ver "mcgaunn.com/logwild/pkg/version"
 )
 
 var (
@@ -80,7 +80,7 @@ func NewRootCmd() *cobra.Command {
 	viper.Set("hostname", hostname)
 	viper.Set("version", ver.VERSION)
 	viper.Set("revision", ver.REVISION)
-	viper.SetEnvPrefix("IANKUBETRACE")
+	viper.SetEnvPrefix("logwild")
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
 

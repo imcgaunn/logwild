@@ -17,11 +17,11 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/trace/noop"
-	"mcgaunn.com/iankubetrace/pkg/version"
+	"mcgaunn.com/logwild/pkg/version"
 )
 
 const (
-	instrumentationName = "github.com/stefanprodan/podinfo/pkg/api"
+	instrumentationName = "mcgaunn.com/logwild/pkg/api"
 )
 
 func (s *Server) initTracer(ctx context.Context) {

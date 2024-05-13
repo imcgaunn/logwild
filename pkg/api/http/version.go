@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"mcgaunn.com/iankubetrace/pkg/version"
+	"mcgaunn.com/logwild/pkg/version"
 )
 
 // Version godoc

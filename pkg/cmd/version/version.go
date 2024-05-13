@@ -6,13 +6,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	ver "mcgaunn.com/iankubetrace/pkg/version"
+	ver "mcgaunn.com/logwild/pkg/version"
 )
 
 var (
 	versionCmdUse   string = "version"
 	versionCmdShort string = "get version"
-	versionCmdLong  string = "get version of iankubetrace"
+	versionCmdLong  string = "get version of logwild"
 	versionString   string = ver.VERSION
 )
 

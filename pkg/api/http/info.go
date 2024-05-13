@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"strconv"
 
-	"mcgaunn.com/iankubetrace/pkg/version"
+	"mcgaunn.com/logwild/pkg/version"
 )
 
 // Info godoc

@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"mcgaunn.com/iankubetrace/pkg/cmd"
+	"mcgaunn.com/logwild/pkg/cmd"
 )
 
 func main() {

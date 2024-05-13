@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"mcgaunn.com/iankubetrace/pkg/api/http"
-	"mcgaunn.com/iankubetrace/pkg/signals"
+	"mcgaunn.com/logwild/pkg/api/http"
+	"mcgaunn.com/logwild/pkg/signals"
 )
 
 var (
@@ -35,7 +35,7 @@ func doRunCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	// log version and server port
-	slog.Info("Starting iankubetrace",
+	slog.Info("Starting logwild",
 		slog.String("version", viper.GetString("version")),
 		slog.String("revision", viper.GetString("revision")),
 		slog.String("port", srvCfg.Port))

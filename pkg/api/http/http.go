@@ -9,7 +9,7 @@ import (
 
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
-	"mcgaunn.com/iankubetrace/pkg/version"
+	"mcgaunn.com/logwild/pkg/version"
 )
 
 func randomErrorMiddleware(next http.Handler) http.Handler {
