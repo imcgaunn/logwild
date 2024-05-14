@@ -71,16 +71,13 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	startTime := time.Now()
 	logCount := 0
 
-	sampleMessage := make([]byte, lm.PerMessageSizeBytes)
-	for i := range sampleMessage {
-		sampleMessage[i] = 'A'
-	}
 	// write a log once a tick
 	for {
 		select {
 		case elem := <-tickr.C:
 			lm.Logger.Debug("processing tick", "elem", elem)
 			// actually write the log, and throw up if we can't
+			sampleMessage := GetFakeSentence()
 			if err := WriteLog(lm, sampleMessage); err != nil {
 				panic(err)
 			}
@@ -102,8 +99,8 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	}
 }
 
-func WriteLog(lm *LogMaker, msg []byte) error {
+func WriteLog(lm *LogMaker, msg string) error {
 	logTime := time.Now().Format(time.RFC3339)
-	lm.Logger.Info(string(msg), "Timestamp", logTime)
+	lm.Logger.Info(msg, "Timestamp", logTime)
 	return nil
 }
