@@ -60,7 +60,7 @@ fmt :
   goimports -l -w ./
 
 tidy :
-	rm -f go.sum; go mod tidy -compat=1.21
+  rm -f go.sum; go mod tidy -compat=1.21
 
 vet :
   go vet ./...
@@ -76,7 +76,7 @@ run-app :
     --debug \
     --port-metrics 8889 \
     --port 8888 \
-    --otel-service-name 'wowowowservice' run {{ EXTRA_RUN_ARGS }}
+    --otel-service-name 'logwild-imcg' run {{ EXTRA_RUN_ARGS }}
 
 # run standalone openobserve service to receive traces, metrics, logs from collector
 run-observe-backend :
