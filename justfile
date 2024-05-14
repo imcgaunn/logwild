@@ -39,13 +39,7 @@ version-set :
   next="{{ TAG }}"
   current="{{ VERSION }}"
   /usr/bin/sed -i "s/$current/$next/g" pkg/version/version.go
-  #/usr/bin/sed -i "s/tag: $current/tag: $next/g" charts/podinfo/values.yaml
-  #/usr/bin/sed -i "s/tag: $current/tag: $next/g" charts/podinfo/values-prod.yaml
-  #/usr/bin/sed -i "s/appVersion: $current/appVersion: $next/g" charts/podinfo/Chart.yaml
-  #/usr/bin/sed -i "s/version: $current/version: $next/g" charts/podinfo/Chart.yaml
-  #/usr/bin/sed -i "s/podinfo:$current/podinfo:$next/g" kustomize/deployment.yaml
-  #/usr/bin/sed -i "s/podinfo:$current/podinfo:$next/g" deploy/webapp/backend/deployment.yaml
-  echo "Version $next set in code, deployment, module, chart and kustomize"
+  echo "Version $next set in code"
 
 release:
   git tag -s -m {{ VERSION }} {{ VERSION }}
@@ -57,7 +51,6 @@ run :
 
 fmt :
   gofmt -l -s -w ./
-  goimports -l -w ./
 
 tidy :
   rm -f go.sum; go mod tidy -compat=1.21

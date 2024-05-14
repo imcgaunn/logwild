@@ -1,10 +1,12 @@
 package http
 
 import (
+	"io"
 	"log/slog"
-	"mcgaunn.com/logwild/pkg/logmaker"
 	"net/http"
 	"os"
+
+	"mcgaunn.com/logwild/pkg/logmaker"
 )
 
 // Loggen godoc
@@ -19,7 +21,13 @@ func (s *Server) logGenHandler(w http.ResponseWriter, r *http.Request) {
 	_, span := s.tracer.Start(r.Context(), "logGenHandler")
 	defer span.End()
 	lvl := &slog.LevelVar{}
-	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: lvl})
+	fp, err := os.Create("/tmp/loggen.log")
+	stdoutAndFile := io.MultiWriter(fp, os.Stdout)
+	if err != nil {
+		s.logger.Error("failed to create log file: ", err)
+		panic(err)
+	}
+	h := slog.NewJSONHandler(stdoutAndFile, &slog.HandlerOptions{Level: lvl})
 	lm := logmaker.NewLogMaker(logmaker.WithLogger(slog.New(h)))
 	donech := make(chan int)
 	go func() {
