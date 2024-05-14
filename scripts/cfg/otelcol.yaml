@@ -13,10 +13,6 @@ receivers:
       grpc:
         endpoint: :4317
 
-  filelog:
-    include:
-      - /var/log/syslog
-
 processors:
   batch:
   memory_limiter:
@@ -31,7 +27,7 @@ exporters:
   prometheus:
     endpoint: :8889
   otlp/openobserve:
-    endpoint: ianpod-openobserve:5081
+    endpoint: logwild-openobserve:5081
     headers:
       Authorization: "Basic cm9vdEBleGFtcGxlLmNvbTpvUTRXdHRYWDlFTG1TRjdq"
       organization: default

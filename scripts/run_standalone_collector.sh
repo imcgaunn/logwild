@@ -6,7 +6,7 @@ setopt pipe_fail
 
 declare -g CONFIG_DIR="${0:A:h}/cfg"
 declare -g OTEL_COLLECTOR_GRPC_PORT="${OTEL_COLLECTOR_GRPC_PORT:-4317}"
-declare -g OTEL_COLLECTOR_CONTAINER_NAME="${OTEL_COLLECTOR_CONTAINER_NAME:-ianpod-otel-coll}"
+declare -g OTEL_COLLECTOR_CONTAINER_NAME="${OTEL_COLLECTOR_CONTAINER_NAME:-logwild-otel-coll}"
 
 function die() {
   local msg="$1"
@@ -32,8 +32,6 @@ function start_collector() {
     --name=${OTEL_COLLECTOR_CONTAINER_NAME} \
     -p 44317:${OTEL_COLLECTOR_GRPC_PORT} \
     --network observe \
-    --mount type=bind,src=./myapplog,dst=/var/log/syslog,ro \
-    --mount type=bind,src=/etc/timezone,dst=/etc/timezone,ro \
     --mount type=bind,src=/etc/localtime,dst=/etc/localtime,ro \
     --mount type=bind,src=${CONFIG_DIR}/otelcol.yaml,dst=/etc/otelcol-contrib/config.yaml \
     --tmpfs=/tmp:rw,noexec,nosuid,size=128m \

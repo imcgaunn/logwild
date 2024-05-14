@@ -7,7 +7,7 @@ setopt pipe_fail
 declare -g CONFIG_DIR="${0:A:h}/cfg"
 declare -g LOCAL_BIN_DIR="$HOME/.local/bin"
 declare -g LOCAL_ZINC_DATA_PATH="${0:A:h}/data"
-declare -g OPENOBSERVE_CONTAINER_NAME="ianpod-openobserve"
+declare -g OPENOBSERVE_CONTAINER_NAME="logwild-openobserve"
 
 
 function die() {
@@ -30,7 +30,6 @@ function start_openobserve() {
   docker run -d -i -t \
     --name ${OPENOBSERVE_CONTAINER_NAME} \
     --mount type=bind,src=${LOCAL_ZINC_DATA_PATH},dst=/data \
-    --mount type=bind,src=/etc/timezone,dst=/etc/timezone,ro \
     --mount type=bind,src=/etc/localtime,dst=/etc/localtime,ro \
     --tmpfs=/tmp:rw,noexec,nosuid,size=128m \
     -p 5080:5080 \
