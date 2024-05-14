@@ -12,4 +12,4 @@ release:
   variables:
     GIT_DEPTH: 0
   script:
-    - goreleaser release --clean
+    - goreleaser release --clean --snapshot
