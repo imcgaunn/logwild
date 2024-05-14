@@ -68,6 +68,7 @@ func NewServer(config *Config, logger *slog.Logger) (*Server, error) {
 func (s *Server) registerHandlers() {
 	s.router.Handle("/metrics", promhttp.Handler())
 	s.router.HandleFunc("/", s.infoHandler).Methods("GET")
+	s.router.HandleFunc("/loggen", s.logGenHandler).Methods("GET")
 	s.router.HandleFunc("/version", s.versionHandler).Methods("GET")
 	s.router.HandleFunc("/env", s.envHandler).Methods("GET", "POST")
 	s.router.HandleFunc("/healthz", s.healthzHandler).Methods("GET")

@@ -21,7 +21,7 @@ help :
 
 build :
   CGO_ENABLED=0 go build -ldflags "-s -w -X mcgaunn.com/logwild/pkg/version.REVISION={{ GIT_COMMIT }}" \
-    -a -o ./bin/logwild ./cmd/ianpod/*
+    -a -o ./bin/logwild ./cmd/logwild/*
 
 build-container :
   @echo "this should build docker container"
