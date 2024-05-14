@@ -4,7 +4,28 @@ writes json logs in a format similar to RCS at a configurable rate in messages p
 ensures that each message contains unique contents to make sure logging backends don't sample
 events.
 
+## building example
+
+before we can run the example program, we need to build it. For your convenience, there is a
+`justfile` recipe that performs this task:
+
+```bash
+logwild on  main [!?] via 🐳 orbstack via 🐹 v1.22.3 on ☁️  (us-east-1) took 1m29s
+✦ ❯ just build
+CGO_ENABLED=0 go build -ldflags "-s -w -X mcgaunn.com/logwild/pkg/version.REVISION=3e3c5f0-dirty" -a -o ./bin/logwild ./cmd/logwild/*
+
+logwild on  main [!?] via 🐳 orbstack via 🐹 v1.22.3 on ☁️  (us-east-1) took 6s
+✦ ❯ latr bin/
+.rwxr-xr-x 17M imcgaunn 14 May 14:07 logwild
+```
+
+a successful build will produce an artifact called `logwild` in `./bin/`
+
 ## running example
+
+now that the example program has been built, we can run it.
+
+#### create docker network
 
 first, create the 'observe' docker network that the containers will use to communicate. There
 is a script defined that can do this for you:
@@ -27,6 +48,43 @@ b1e231de1a95   host      host      local
 b299faf05206   none      null      local
 a2099b63b53a   observe   bridge    local
 ```
+
+### opentelemetry collector authorization
+
+to ensure that the opentelemetry collector can access openobserve, you may need to
+update the authorization info supplied in `scripts/cfg/otelcol.yaml`.
+
+first, start up the `openobserve` backend by itself (without the collector):
+
+```bash
+just run-observe-backend
+```
+
+then, navigate to the following url in a web browser to grab the authorization info:
+
+[Default org Otel Ingestion settings](http://localhost:5080/web/ingestion/custom/logs/otel?org_identifier=default)
+
+#### example value
+
+```bash
+exporters:
+  otlp/openobserve:
+      endpoint: localhost:5081
+      headers:
+        Authorization: "Basic notrealvalue"
+        organization: default
+        stream-name: default
+      tls:
+        insecure: true
+```
+
+copy the value for `exporters.otlp/openobserve.headers.Authorization`and run the following command to update otelcol.yaml:
+
+```
+# create a command to update the otelcol.yaml file in place
+```
+
+### finally running example
 
 now, you should be able to run the full example in a separate tmux session by
 executing `just run-in-panels`, i.e.:
