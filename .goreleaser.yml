@@ -1,3 +1,8 @@
+# The lines beneath this are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
 # This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
 before:
@@ -30,7 +35,6 @@ archives:
       - goos: windows
         format: zip
     files:
-      - config/**
       - README.md
       - LICENSE
 checksum:
@@ -43,35 +47,3 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
-
-brews:
-  - repository:
-      owner: alertinnovation/devops
-      name: homebrew-tools
-      token: "{{ .Env.HOMEBREW_RELEASE_TOKEN }}"
-    homepage: "https://gitlab.com/alertinnovation/devops/tools/sconn" # this doesn't actually exist !
-    url_template: https://gitlab.com/api/v4/projects/{{ .Env.CI_PROJECT_ID }}/packages/generic/sconn/{{ trimprefix .Tag "v"}}/{{ .ArtifactName }}
-    folder: Formula
-    install: |-
-      bin.install "sconn"
-      share.install Dir["config/*"]
-    test: |-
-      system "#{bin}/sconn install"
-    download_strategy: GitlabPrivateRepositoryReleaseDownloadStrategy
-    custom_require: lib/private_strategy
-    dependencies:
-      - name: fzf
-      - name: azure-cli
-# chocolateys:
-#   - source_repo: "https://alertinnovation.jfrog.io/artifactory/api/nuget/devops-nuget/"
-#     api_key: '{{ .Env.CI_REGISTRY_PASSWORD }}'
-#     project_url: "https://gitlab.com/alertinnovation/devops/tools/sconn" # this doesn't actually exist !
-#     url_template: https://gitlab.com/api/v4/projects/{{ .Env.CI_PROJECT_ID }}/packages/generic/sconn/{{ trimprefix .Tag "v"}}/{{ .ArtifactName }}
-#     dependencies:
-#     - id: fzf
-#     - id: azure-cli
-# The lines beneath this are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/use them.
-# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
-# vim: set ts=2 sw=2 tw=0 fo=cnqoj
-
