@@ -14,6 +14,12 @@ func TestCanMakeLogMaker(t *testing.T) {
 	if mkr.BurstDuration != time.Duration(5*time.Second) {
 		t.FailNow()
 	}
+	if mkr.PerSecondRate != 1000 {
+		t.FailNow()
+	}
+	if mkr.PerMessageSizeBytes != 2*1024 {
+		t.FailNow()
+	}
 }
 
 func TestThatLogMakerLogsToConfiguredLogger(t *testing.T) {
@@ -22,14 +28,20 @@ func TestThatLogMakerLogsToConfiguredLogger(t *testing.T) {
 	if err != nil {
 		t.Errorf("something bad happened trying to open temp file %s\n", err)
 	}
-	defer os.Remove(f.Name())
+	// if we did open the file, clean it up at the end of the test
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			panic(err) // really too late to do anything at this point :/
+		}
+	}(f.Name())
 
 	donech := make(chan int)
 	hdl := slog.NewJSONHandler(f, nil)
-	mkr := NewLogMaker(
-		WithLogger(slog.New(hdl)),
+	mkr := NewLogMaker(WithLogger(slog.New(hdl)),
 		WithPerSecondRate(5000),
-		WithBurstDuration(time.Second))
+		WithPerMessageSizeBytes(1024),
+		WithBurstDuration(1*time.Second))
 	go func() {
 		err := mkr.StartWriting(donech)
 		if err != nil {

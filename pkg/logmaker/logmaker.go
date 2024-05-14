@@ -70,10 +70,12 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	tickr := time.NewTicker(tickDuration)
 	startTime := time.Now()
 	logCount := 0
+
 	sampleMessage := make([]byte, lm.PerMessageSizeBytes)
 	for i := range sampleMessage {
 		sampleMessage[i] = 'A'
 	}
+	// write a log once a tick
 	for {
 		select {
 		case elem := <-tickr.C:

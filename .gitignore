@@ -1,2 +1,4 @@
 bin/
 scripts/data
+.clj-kondo
+.lsp
