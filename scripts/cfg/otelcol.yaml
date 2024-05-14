@@ -44,8 +44,5 @@ service:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [debug, otlp/openobserve]
-    logs:
-      receivers: [filelog]
-      exporters: [debug, otlp/openobserve]
 
   extensions: [pprof, health_check, zpages]
