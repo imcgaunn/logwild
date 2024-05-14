@@ -9,9 +9,9 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - main: ./cmd/logwild/
   - env:
       - CGO_ENABLED=0
+    main: ./cmd/logwild/
     goos:
       - linux
       - darwin
