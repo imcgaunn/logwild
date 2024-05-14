@@ -6,13 +6,11 @@ extensions:
     size_mib: 512
   zpages:
     endpoint: :55679
-
 receivers:
   otlp:
     protocols:
       grpc:
         endpoint: :4317
-
 processors:
   batch:
   memory_limiter:
@@ -21,7 +19,6 @@ processors:
     # 25% of limit up to 2G
     spike_limit_mib: 512
     check_interval: 5s
-
 exporters:
   debug:
   prometheus:
@@ -29,7 +26,7 @@ exporters:
   otlp/openobserve:
     endpoint: logwild-openobserve:5081
     headers:
-      Authorization: "Basic cm9vdEBleGFtcGxlLmNvbTpvUTRXdHRYWDlFTG1TRjdq"
+      Authorization: "Basic cmfakefakefake"
       organization: default
       stream-name: default
     tls:
@@ -44,5 +41,4 @@ service:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [debug, otlp/openobserve]
-
   extensions: [pprof, health_check, zpages]

@@ -78,10 +78,15 @@ exporters:
         insecure: true
 ```
 
-copy the value for `exporters.otlp/openobserve.headers.Authorization`and run the following command to update otelcol.yaml:
+copy the value for `exporters.otlp/openobserve.headers.Authorization` including
+the surrounding quotes, and run the following command to update `otelcol.yaml`:
 
-```
-# create a command to update the otelcol.yaml file in place
+```bash
+# update otelcol.yaml file in place
+yq -i '.exporters.otlp/openobserve.headers.Authorization="Basic notrealvalue"' scripts/cfg/otelcol.yaml
+# check value for exporters.otelp/openobserve.headers.Authorization
+yq '.exporters.otlp/openobserve.headers.Authorization' scripts/cfg/otelcol.yaml
+# should report a value like "Basic notrealvalue"
 ```
 
 ### finally running example
