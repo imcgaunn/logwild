@@ -8,24 +8,24 @@ SCRIPT_DIR="${0:A:h}"
 SESS_NAME="logwild_demo"
 
 function die() {
-  echo "i am dead"
-  exit 222
+    echo "i am dead"
+    exit 222
 }
 
 function cleanup() {
-  for window_addr in "1.1" "1.2" "1.3"; do
-    printf "sending ctrlc to window_addr: %s\n" "${window_addr}"
-    tmux send-keys -t ${SESS_NAME}:${window_addr} C-c
-  done
-  printf "successfully cleaned up\n"
+    for window_addr in "1.1" "1.2" "1.3"; do
+        printf "sending ctrlc to window_addr: %s\n" "${window_addr}"
+        tmux send-keys -t ${SESS_NAME}:${window_addr} C-c
+    done
+    printf "successfully cleaned up\n"
 }
 
 trap 'cleanup' EXIT
 
 if tmux has-session -t "${SESS_NAME}" 2>/dev/null; then
 
-  printf "killing existing session %s\n" "${SESS_NAME}"
-  tmux kill-session -t "${SESS_NAME}"
+    printf "killing existing session %s\n" "${SESS_NAME}"
+    tmux kill-session -t "${SESS_NAME}"
 fi
 
 # create a new tmux session
