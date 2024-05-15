@@ -13,3 +13,7 @@ release:
     GIT_DEPTH: 0
   script:
     - goreleaser release --clean --snapshot
+  artifacts:
+    paths:
+      - "dist/*"
+    expire_in: 1 week
