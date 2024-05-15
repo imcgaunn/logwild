@@ -28,9 +28,9 @@ var (
 
 func NewRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "slackwinz",
-		Short: "slackwinz command line",
-		Long:  "slackwinz command line driver program",
+		Use:   "logwild",
+		Short: "logwild command line",
+		Long:  "logwild command line driver program",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Usage()
 		},
