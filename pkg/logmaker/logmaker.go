@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const (
+	microsPerSecond int = 1000 * 1000
+	microsPerMilli  int = 1000
+)
+
 type OptFunc func(*Opts)
 
 type Opts struct {
@@ -64,18 +69,16 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	// calculate duration based on PerSecondRate in cfg
 	// just always use microsecond precision
 	// microseconds between ticks
-	microsPerSecond := 1000 * 1000
-	microsPerMilli := 1000
 	microsPerEvent := float64(microsPerSecond) / float64(lm.PerSecondRate)
 	slog.Info("about to configure logMaker", "microsPerEvent", microsPerEvent, "perSecondRate", lm.PerSecondRate)
 	logsPerTick := float64(1) // how many logs need to be emitted per tick
 	var ticksPerSecond int64
 	var tickDuration time.Duration
-	if microsPerEvent < float64(microsPerMilli) {
-		// if each event is < 1ms, we have to do some tricks
+	if microsPerEvent < 5*float64(microsPerMilli) {
+		// if each event is < 5ms we have to do some tricks
 		// maximum resolution of go ticker is about 1ms on unix
 		slog.Info("microsPerEvent less than microsPerMilli", "microsPerMilli", microsPerMilli)
-		tickDuration = time.Duration(1 * time.Millisecond)
+		tickDuration = time.Duration(5 * time.Millisecond)
 	} else {
 		// if time between events is more than 1ms, don't worry about, it just
 		// do one log per tick.
@@ -96,11 +99,13 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 			for i := 0; i < int(logsPerTick); i++ {
 				lm.Logger.Debug("processing tick", "elem", elem)
 				// actually write the log, and throw up if we can't
-				sampleMessage := GetFakeSentence()
-				if err := WriteLog(lm, sampleMessage); err != nil {
-					panic(err)
-				}
-				logCount++
+				go func() {
+					sampleMessage := GetFakeSentence()
+					if err := WriteLog(lm, sampleMessage); err != nil {
+						panic(err)
+					}
+					logCount++
+				}()
 			}
 
 		default:
