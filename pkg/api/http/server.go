@@ -30,20 +30,23 @@ var (
 )
 
 type Config struct {
-	HttpClientTimeout     time.Duration `mapstructure:"http-client-timeout"`
-	HttpServerTimeout     time.Duration `mapstructure:"http-server-timeout"`
-	ServerShutdownTimeout time.Duration `mapstructure:"server-shutdown-timeout"`
-	BackendURL            []string      `mapstructure:"backend-url"`
-	DataPath              string        `mapstructure:"data-path"`
-	ConfigPath            string        `mapstructure:"config-path"`
-	CertPath              string        `mapstructure:"cert-path"`
-	Host                  string        `mapstructure:"host"`
-	Port                  string        `mapstructure:"port"`
-	SecurePort            string        `mapstructure:"secure-port"`
-	PortMetrics           int           `mapstructure:"port-metrics"`
-	Hostname              string        `mapstructure:"hostname"`
-	Unhealthy             bool          `mapstructure:"unhealthy"`
-	Unready               bool          `mapstructure:"unready"`
+	HttpClientTimeout          time.Duration `mapstructure:"http-client-timeout"`
+	HttpServerTimeout          time.Duration `mapstructure:"http-server-timeout"`
+	ServerShutdownTimeout      time.Duration `mapstructure:"server-shutdown-timeout"`
+	BackendURL                 []string      `mapstructure:"backend-url"`
+	DataPath                   string        `mapstructure:"data-path"`
+	ConfigPath                 string        `mapstructure:"config-path"`
+	CertPath                   string        `mapstructure:"cert-path"`
+	Host                       string        `mapstructure:"host"`
+	Port                       string        `mapstructure:"port"`
+	SecurePort                 string        `mapstructure:"secure-port"`
+	PortMetrics                int           `mapstructure:"port-metrics"`
+	Hostname                   string        `mapstructure:"hostname"`
+	Unhealthy                  bool          `mapstructure:"unhealthy"`
+	Unready                    bool          `mapstructure:"unready"`
+	LogwildPerSecondRate       int64         `mapstructure:"logwild-per-second-rate"`
+	LogwildPerMessageSizeBytes int64         `mapstructure:"logwild-per-message-bytes"`
+	LogwildOutFile             string        `mapstructure:"logwild-out-file"`
 }
 
 type Server struct {

@@ -15,15 +15,19 @@ import (
 )
 
 var (
-	debug           bool
-	host            string
-	port            string
-	httpsPort       string
-	portMetrics     string
-	configPath      string
-	certPath        string
-	config          string
-	otelServiceName string
+	debug                   bool
+	host                    string
+	port                    string
+	httpsPort               string
+	portMetrics             string
+	configPath              string
+	certPath                string
+	config                  string
+	otelServiceName         string
+	logsPerSecondRate       int64
+	logsPerMessageSizeBytes int64
+	logsBurstDuration       int
+	logsOutFile             string
 )
 
 func NewRootCmd() *cobra.Command {
@@ -71,6 +75,10 @@ func NewRootCmd() *cobra.Command {
 	p.StringVar(&configPath, "config-path", "", "config dir path")
 	p.StringVar(&config, "config", "config.yaml", "config file name within config dir")
 	p.StringVar(&otelServiceName, "otel-service-name", "", "service name to report to otel address, disables tracing when not set")
+	p.Int64Var(&logsPerSecondRate, "log-rate", 1000, "number of logs to emit per second with each /loggen request")
+	p.Int64Var(&logsPerMessageSizeBytes, "log-bytes", 1024, "average size of each log message produced in bytes")
+	p.IntVar(&logsBurstDuration, "log-burst-duration", 5, "number of seconds to spam logs per /loggen request")
+	p.StringVar(&logsOutFile, "log-out-file", "/tmp/logwild.log", "path to file logs should be streamed for /loggen, or - for stdout")
 
 	// bind flags and environment variables
 	viper.BindPFlags(p)

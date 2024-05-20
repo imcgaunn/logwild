@@ -64,24 +64,44 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	// calculate duration based on PerSecondRate in cfg
 	// just always use microsecond precision
 	// microseconds between ticks
-	microsPerSecond := time.Second / time.Microsecond
+	microsPerSecond := 1000 * 1000
+	microsPerMilli := 1000
 	microsPerEvent := float64(microsPerSecond) / float64(lm.PerSecondRate)
-	tickDuration := time.Duration(microsPerEvent) * time.Microsecond
+	logsPerTick := float64(1) // how many logs need to be emitted per tick
+	var ticksPerSecond int64
+	var tickDuration time.Duration
+	if microsPerEvent < float64(microsPerMilli) {
+		// if each event is < 1ms, we have to do some tricks
+		// maximum resolution of go ticker is about 1ms on unix
+		slog.Info("microsPerEvent less than microsPerMilli", "microsPerMilli", microsPerMilli)
+		tickDuration = time.Duration(1 * time.Millisecond)
+	} else {
+		// if time between events is more than 1ms, don't worry about, it just
+		// do one log per tick.
+		tickDuration = time.Duration(microsPerEvent) * time.Microsecond
+	}
+	ticksPerSecond = int64(time.Second / tickDuration)
+	logsPerTick = float64(lm.PerSecondRate) / float64(ticksPerSecond)
 	tickr := time.NewTicker(tickDuration)
 	startTime := time.Now()
 	logCount := 0
 
-	// write a log once a tick
+	slog.Info("ticker settings", "microsPerEvent", microsPerEvent, "tickDuration", tickDuration, "logsPerTick", logsPerTick, "ticksPerSecond", ticksPerSecond, "logsPerSecond", lm.PerSecondRate)
+
+	// write logsPerTick each tick
 	for {
 		select {
 		case elem := <-tickr.C:
-			lm.Logger.Debug("processing tick", "elem", elem)
-			// actually write the log, and throw up if we can't
-			sampleMessage := GetFakeSentence()
-			if err := WriteLog(lm, sampleMessage); err != nil {
-				panic(err)
+			for i := 0; i < int(logsPerTick); i++ {
+				lm.Logger.Debug("processing tick", "elem", elem)
+				// actually write the log, and throw up if we can't
+				sampleMessage := GetFakeSentence()
+				if err := WriteLog(lm, sampleMessage); err != nil {
+					panic(err)
+				}
+				logCount++
 			}
-			logCount++
+
 		default:
 			// if we have reached our time limit, we can stop. otherwise, just spin on select
 			if time.Since(startTime) >= lm.BurstDuration {
@@ -89,6 +109,7 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 				done <- logCount
 				lm.Logger.Debug("completed burst", "logCount", logCount)
 				// calculate effective logging rates and return them?
+				slog.Info("completed burst", "logCount", logCount)
 				effectiveRateMessages := float64(logCount) / time.Since(startTime).Seconds()
 				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSizeBytes)) / (1024 * 1024)
 				fmt.Printf("Effective logging rate: %.2f logs per second\n", effectiveRateMessages)

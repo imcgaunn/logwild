@@ -18,6 +18,7 @@ func NewMockServer() *Server {
 		ConfigPath:            "/config",
 		HttpClientTimeout:     30 * time.Second,
 		Hostname:              "localhost",
+		LogwildOutFile:        "/tmp/logwild.log",
 	}
 
 	logger := slog.Default().With()
