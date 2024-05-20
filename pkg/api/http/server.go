@@ -44,9 +44,9 @@ type Config struct {
 	Hostname                   string        `mapstructure:"hostname"`
 	Unhealthy                  bool          `mapstructure:"unhealthy"`
 	Unready                    bool          `mapstructure:"unready"`
-	LogwildPerSecondRate       int64         `mapstructure:"logwild-per-second-rate"`
-	LogwildPerMessageSizeBytes int64         `mapstructure:"logwild-per-message-bytes"`
-	LogwildOutFile             string        `mapstructure:"logwild-out-file"`
+	LogwildPerSecondRate       int64         `mapstructure:"log-rate"`
+	LogwildPerMessageSizeBytes int64         `mapstructure:"log-bytes"`
+	LogwildOutFile             string        `mapstructure:"log-out-file"`
 }
 
 type Server struct {

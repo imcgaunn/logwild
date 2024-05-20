@@ -35,7 +35,7 @@ func (s *Server) logGenHandler(w http.ResponseWriter, r *http.Request) {
 		var err error
 		fp, err = os.Create(s.config.LogwildOutFile)
 		if err != nil {
-			s.logger.Error("failed to create log file: ", err)
+			s.logger.Error("failed to create log file: ", err, "fileName", s.config.LogwildOutFile)
 			panic(err)
 		}
 	}
