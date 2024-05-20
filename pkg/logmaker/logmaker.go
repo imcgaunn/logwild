@@ -67,6 +67,7 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	microsPerSecond := 1000 * 1000
 	microsPerMilli := 1000
 	microsPerEvent := float64(microsPerSecond) / float64(lm.PerSecondRate)
+	slog.Info("about to configure logMaker", "microsPerEvent", microsPerEvent, "perSecondRate", lm.PerSecondRate)
 	logsPerTick := float64(1) // how many logs need to be emitted per tick
 	var ticksPerSecond int64
 	var tickDuration time.Duration
