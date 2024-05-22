@@ -24,12 +24,14 @@ import (
 func (s *Server) logGenHandler(w http.ResponseWriter, r *http.Request) {
 	_, span := s.tracer.Start(r.Context(), "logGenHandler")
 	defer span.End()
+	span.AddEvent("startInitializeLogger")
 	h := s.createLogHandlerOrPanic()
 	// create initial options from config
 	optFuncs := s.buildLoggerOptionsFromConfig()
 	// override functions based on query params
 	optFuncs = append(optFuncs, s.buildLoggerOptionsFromQueryParams(h, r)...)
 	lm := logmaker.NewLogMaker(optFuncs...)
+	span.AddEvent("doneInitializeLogger")
 	slog.Info("lm config", "perSecondRate", lm.PerSecondRate)
 	donech := make(chan int)
 	go func() {

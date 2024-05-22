@@ -26,7 +26,7 @@ exporters:
   otlp/openobserve:
     endpoint: logwild-openobserve:5081
     headers:
-      Authorization: "Basic cmfakefakefake"
+      Authorization: "Basic cm9vdEBleGFtcGxlLmNvbTpDZnluVHowNHRsc3oxWE95"
       organization: default
       stream-name: default
     tls:
