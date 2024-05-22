@@ -1,6 +1,9 @@
 package http
 
 import (
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 	"log/slog"
 	"net/http"
 	"os"
@@ -32,11 +35,15 @@ func (s *Server) logGenHandler(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		err := lm.StartWriting(donech)
 		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
 			panic(err) // something bad here
 		}
 	}()
+	span.AddEvent("startedWriting", trace.WithAttributes(attribute.Int("logCount", 0)))
 	logCount := <-donech
 	data := LogStatsResponse{logCount: logCount}
+	span.AddEvent("doneWriting", trace.WithAttributes(attribute.Int("logCount", logCount)))
+	span.SetStatus(codes.Ok, "successfully wrote logs")
 	s.JSONResponse(w, r, data)
 }
 

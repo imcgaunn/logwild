@@ -103,6 +103,10 @@ func (s *Server) ListenAndServe() (*http.Server, *int32, *int32) {
 	s.handler = s.router
 
 	// s.printRoutes()
+	// provide default value for output file
+	if s.config.LogwildOutFile == "" {
+		s.config.LogwildOutFile = "-"
+	}
 
 	// create the http server
 	srv := s.startServer()
