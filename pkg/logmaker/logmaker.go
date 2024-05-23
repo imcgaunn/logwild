@@ -66,18 +66,19 @@ func NewLogMaker(opts ...OptFunc) *LogMaker {
 }
 
 func (lm *LogMaker) StartWriting(done chan int) error {
+	defer close(done)
 	// calculate duration based on PerSecondRate in cfg
 	// just always use microsecond precision
 	// microseconds between ticks
 	microsPerEvent := float64(microsPerSecond) / float64(lm.PerSecondRate)
-	slog.Info("about to configure logMaker", "microsPerEvent", microsPerEvent, "perSecondRate", lm.PerSecondRate)
+	lm.Logger.Debug("about to start logMaker", "microsPerEvent", microsPerEvent, "perSecondRate", lm.PerSecondRate)
 	logsPerTick := float64(1) // how many logs need to be emitted per tick
 	var ticksPerSecond int64
 	var tickDuration time.Duration
 	if microsPerEvent < 5*float64(microsPerMilli) {
 		// if each event is < 5ms we have to do some tricks
 		// maximum resolution of go ticker is about 1ms on unix
-		slog.Info("microsPerEvent less than microsPerMilli", "microsPerMilli", microsPerMilli)
+		lm.Logger.Debug("microsPerEvent less than microsPerMilli", "microsPerMilli", microsPerMilli)
 		tickDuration = time.Duration(5 * time.Millisecond)
 	} else {
 		// if time between events is more than 1ms, don't worry about, it just
@@ -90,7 +91,7 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	startTime := time.Now()
 	logCount := 0
 
-	slog.Info("ticker settings", "microsPerEvent", microsPerEvent, "tickDuration", tickDuration, "logsPerTick", logsPerTick, "ticksPerSecond", ticksPerSecond, "logsPerSecond", lm.PerSecondRate)
+	lm.Logger.Info("ticker settings", "microsPerEvent", microsPerEvent, "tickDuration", tickDuration, "logsPerTick", logsPerTick, "ticksPerSecond", ticksPerSecond, "logsPerSecond", lm.PerSecondRate)
 
 	// write logsPerTick each tick
 	for {
@@ -113,13 +114,12 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 			if time.Since(startTime) >= lm.BurstDuration {
 				tickr.Stop()
 				done <- logCount
-				lm.Logger.Debug("completed burst", "logCount", logCount)
 				// calculate effective logging rates and return them?
-				slog.Info("completed burst", "logCount", logCount)
+				lm.Logger.Info("completed burst", "logCount", logCount)
 				effectiveRateMessages := float64(logCount) / time.Since(startTime).Seconds()
 				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSizeBytes)) / (1024 * 1024)
-				fmt.Printf("Effective logging rate: %.2f logs per second\n", effectiveRateMessages)
-				fmt.Printf("Effective logging rate (Mb/s): %.2f Mb per second\n", effectiveRateMbs)
+				lm.Logger.Info(fmt.Sprintf("Effective logging rate: %.2f logs per second\n", effectiveRateMessages))
+				lm.Logger.Info(fmt.Sprintf("Effective logging rate (Mb/s): %.2f Mb per second\n", effectiveRateMbs))
 				return nil
 			}
 		}

@@ -37,7 +37,7 @@ func TestThatLogMakerLogsToConfiguredLogger(t *testing.T) {
 	}(f.Name())
 
 	donech := make(chan int)
-	hdl := slog.NewJSONHandler(f, &slog.HandlerOptions{Level: slog.LevelDebug})
+	hdl := slog.NewTextHandler(f, &slog.HandlerOptions{Level: slog.LevelDebug})
 	mkr := NewLogMaker(WithLogger(slog.New(hdl)),
 		WithPerSecondRate(5000),
 		WithPerMessageSizeBytes(1024),

@@ -1,14 +1,16 @@
 package http
 
 import (
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"mcgaunn.com/logwild/pkg/logmaker"
 )
@@ -32,13 +34,14 @@ func (s *Server) logGenHandler(w http.ResponseWriter, r *http.Request) {
 	optFuncs = append(optFuncs, s.buildLoggerOptionsFromQueryParams(h, r)...)
 	lm := logmaker.NewLogMaker(optFuncs...)
 	span.AddEvent("doneInitializeLogger")
-	slog.Info("lm config", "perSecondRate", lm.PerSecondRate)
+	s.logger.Info("lm config", "perSecondRate", lm.PerSecondRate)
 	donech := make(chan int)
 	go func() {
 		err := lm.StartWriting(donech)
 		if err != nil {
 			span.SetStatus(codes.Error, err.Error())
-			panic(err) // something bad here
+			s.logger.Error("encountered problem trying to start logmaker", "err", err)
+			// should return bad status to http as well
 		}
 	}()
 	span.AddEvent("startedWriting", trace.WithAttributes(attribute.Int("logCount", 0)))
@@ -77,41 +80,41 @@ func (s *Server) buildLoggerOptionsFromConfig() []logmaker.OptFunc {
 
 func (s *Server) buildLoggerOptionsFromQueryParams(h *slog.JSONHandler, r *http.Request) []logmaker.OptFunc {
 	var optFuncs []logmaker.OptFunc
-	queryVals := r.URL.Query()
 	_, span := s.tracer.Start(r.Context(), "handleQueryParams")
 	defer span.End()
-	perSecondRateParam := queryVals.Get("per_second")
-	perMessageSizeParam := queryVals.Get("message_size")
-	burstDuration := queryVals.Get("burst_dur")
+
 	s.logger.Info("config params", "perSecondRate", s.config.LogwildPerSecondRate, "outFile", s.config.LogwildOutFile)
 
-	if perSecondRateParam != "" {
-		s.logger.Debug("handling perSecondRateParam", "perSecondRateParam", perSecondRateParam)
-		perSecondRateInt, err := strconv.ParseInt(perSecondRateParam, 10, 64)
-		if err != nil {
-			panic(err) // could not convert perSecondRate param to integer :(
-		}
+	perSecondRateInt, err := s.tryParseAndLogIntParam(r, "per_second")
+	if err == nil {
 		optFuncs = append(optFuncs, logmaker.WithPerSecondRate(perSecondRateInt))
 	}
-	if perMessageSizeParam != "" {
-		s.logger.Debug("handling perMessageSizeParam", "perMessageSizeParam", perMessageSizeParam)
-		perMessageSizeInt, err := strconv.ParseInt(perMessageSizeParam, 10, 64)
-		if err != nil {
-			panic(err) // could not convert perMessageSize param to integer :(
-		}
+	perMessageSizeInt, err := s.tryParseAndLogIntParam(r, "message_size")
+	if err == nil {
 		optFuncs = append(optFuncs, logmaker.WithPerMessageSizeBytes(perMessageSizeInt))
 	}
-	if burstDuration != "" {
-		s.logger.Debug("handling burstDuration", "burstDuration", burstDuration)
-		burstDurationInt, err := strconv.ParseInt(burstDuration, 10, 0)
-		if err != nil {
-			panic(err)
-		}
-		optFuncs = append(optFuncs, logmaker.WithBurstDuration(time.Second*time.Duration(burstDurationInt)))
+	burstDurationInt, err := s.tryParseAndLogIntParam(r, "burst_dur")
+	if err == nil {
+		optFuncs = append(optFuncs, logmaker.WithBurstDuration(time.Duration(burstDurationInt)))
 	}
 	optFuncs = append(optFuncs, logmaker.WithLogger(slog.New(h)))
 	s.logger.Info("configured optFuncs", "optFuncs", optFuncs)
 	return optFuncs
+}
+
+func (s *Server) tryParseAndLogIntParam(r *http.Request, paramName string) (int64, error) {
+	queryVals := r.URL.Query()
+	paramVal := queryVals.Get(paramName)
+	s.logger.Debug("handling parameter", "paramName", paramName, "paramVal", paramVal)
+	if paramVal == "" {
+		return 0, errors.New("requested parameter not present in request")
+	}
+	intValue, err := strconv.ParseInt(paramVal, 10, 64)
+	if err != nil {
+		s.logger.Error("could not parse param as integer", "paramName", paramName, "paramVal", paramVal, "err", err)
+		return 0, errors.New("could not parse param as integer")
+	}
+	return intValue, nil
 }
 
 type LogStatsResponse struct {

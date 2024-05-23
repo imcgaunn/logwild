@@ -2,6 +2,7 @@ package http
 
 import (
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -10,18 +11,21 @@ import (
 
 func NewMockServer() *Server {
 	config := &Config{
-		Port:                  "9998",
-		ServerShutdownTimeout: 5 * time.Second,
-		HttpServerTimeout:     30 * time.Second,
-		BackendURL:            []string{},
-		DataPath:              "/data",
-		ConfigPath:            "/config",
-		HttpClientTimeout:     30 * time.Second,
-		Hostname:              "localhost",
-		LogwildOutFile:        "/tmp/logwild.log",
+		Port:                       "9998",
+		ServerShutdownTimeout:      5 * time.Second,
+		HttpServerTimeout:          30 * time.Second,
+		BackendURL:                 []string{},
+		DataPath:                   "/data",
+		ConfigPath:                 "/config",
+		HttpClientTimeout:          30 * time.Second,
+		Hostname:                   "localhost",
+		LogwildOutFile:             "-",
+		LogwildPerSecondRate:       5000,
+		LogwildPerMessageSizeBytes: 1024,
 	}
-
-	logger := slog.Default().With()
+	h := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})
+	slog.SetDefault(slog.New(h))
+	logger := slog.Default().With("mockserver", "yes")
 	return &Server{
 		router: mux.NewRouter(),
 		logger: logger,
