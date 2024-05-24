@@ -84,7 +84,9 @@ func (s *Server) buildLoggerOptionsFromQueryParams(h *slog.JSONHandler, r *http.
 	_, span := s.tracer.Start(r.Context(), "handleQueryParams")
 	defer span.End()
 
-	s.logger.Info("config params", "perSecondRate", s.config.LogwildPerSecondRate, "outFile", s.config.LogwildOutFile)
+	s.logger.Info("config params",
+		"perSecondRate", s.config.LogwildPerSecondRate,
+		"outFile", s.config.LogwildOutFile)
 
 	perSecondRateInt, err := s.tryParseAndLogIntParam(r, "per_second")
 	if err == nil {
