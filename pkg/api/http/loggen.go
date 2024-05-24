@@ -36,6 +36,7 @@ func (s *Server) logGenHandler(w http.ResponseWriter, r *http.Request) {
 	span.AddEvent("doneInitializeLogger")
 	s.logger.Info("lm config", "perSecondRate", lm.PerSecondRate)
 	donech := make(chan int)
+	defer close(donech)
 	go func() {
 		err := lm.StartWriting(donech)
 		if err != nil {
@@ -95,7 +96,7 @@ func (s *Server) buildLoggerOptionsFromQueryParams(h *slog.JSONHandler, r *http.
 	}
 	burstDurationInt, err := s.tryParseAndLogIntParam(r, "burst_dur")
 	if err == nil {
-		optFuncs = append(optFuncs, logmaker.WithBurstDuration(time.Duration(burstDurationInt)))
+		optFuncs = append(optFuncs, logmaker.WithBurstDuration(time.Duration(burstDurationInt)*time.Second))
 	}
 	optFuncs = append(optFuncs, logmaker.WithLogger(slog.New(h)))
 	s.logger.Info("configured optFuncs", "optFuncs", optFuncs)

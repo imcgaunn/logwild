@@ -66,7 +66,6 @@ func NewLogMaker(opts ...OptFunc) *LogMaker {
 }
 
 func (lm *LogMaker) StartWriting(done chan int) error {
-	defer close(done)
 	// calculate duration based on PerSecondRate in cfg
 	// just always use microsecond precision
 	// microseconds between ticks
