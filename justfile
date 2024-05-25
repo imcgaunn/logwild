@@ -3,7 +3,7 @@
 set shell := ["zsh", "-cu"]
 set dotenv-load := true
 
-DOCKER_REPOSITORY := "wot"
+DOCKER_REPOSITORY := "mcgaunn.com"
 TAG := `echo ${TAG:=latest}`
 NAME := "logwild"
 GIT_COMMIT := `git describe --dirty --always`
@@ -20,11 +20,16 @@ help :
   @just --list
 
 build :
+  #!/bin/zsh -exu
   CGO_ENABLED=0 go build -ldflags "-s -w -X mcgaunn.com/logwild/pkg/version.REVISION={{ GIT_COMMIT }}" \
     -a -o ./bin/logwild ./cmd/logwild/*
 
 build-container :
-  @echo "this should build docker container"
+  #!/bin/zsh -exu
+  echo "building docker container"
+  docker build . -t "{{ DOCKER_REPOSITORY }}/{{ NAME }}:{{ GIT_COMMIT }}"
+  # also make sure latest is defined
+  docker tag "{{ DOCKER_REPOSITORY }}/{{ NAME }}:{{ GIT_COMMIT }}" latest
 
 build-charts :
   @echo "this should build helm charts"
