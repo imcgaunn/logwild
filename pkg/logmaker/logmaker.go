@@ -27,7 +27,7 @@ type LogMaker struct {
 func defaultOpts() Opts {
 	return Opts{
 		PerSecondRate:  1000,
-		PerMessageSize: 1024 * 2,
+		PerMessageSize: 48,
 		BurstDuration:  5 * time.Second,
 		Logger:         slog.Default(),
 	}
@@ -119,7 +119,7 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 					"timeSpentSeconds", fmt.Sprintf("%.2f", timeSpentSeconds),
 					"logCount", logCount)
 				effectiveRateMessages := float64(logCount) / time.Since(startTime).Seconds()
-				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSize)) / (1024 * 1024)
+				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSize) * 9) / (1024 * 1024)
 				lm.Logger.Info(fmt.Sprintf("Effective logging rate: %.2f logs per second", effectiveRateMessages))
 				lm.Logger.Info(fmt.Sprintf("Effective logging rate (Mb/s): %.2f Mb per second", effectiveRateMbs))
 				return nil

@@ -11,17 +11,17 @@ import (
 
 func NewMockServer() *Server {
 	config := &Config{
-		Port:                       "9998",
-		ServerShutdownTimeout:      5 * time.Second,
-		HttpServerTimeout:          30 * time.Second,
-		BackendURL:                 []string{},
-		DataPath:                   "/data",
-		ConfigPath:                 "/config",
-		HttpClientTimeout:          30 * time.Second,
-		Hostname:                   "localhost",
-		LogwildOutFile:             "-",
-		LogwildPerSecondRate:       5000,
-		LogwildPerMessageSizeBytes: 1024,
+		Port:                  "9998",
+		ServerShutdownTimeout: 5 * time.Second,
+		HttpServerTimeout:     30 * time.Second,
+		BackendURL:            []string{},
+		DataPath:              "/data",
+		ConfigPath:            "/config",
+		HttpClientTimeout:     30 * time.Second,
+		Hostname:              "localhost",
+		LogwildOutFile:        "-",
+		LogwildPerSecondRate:  5000,
+		LogwildPerMessageSize: 50,
 	}
 	h := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})
 	slog.SetDefault(slog.New(h))
