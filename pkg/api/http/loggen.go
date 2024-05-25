@@ -94,7 +94,7 @@ func (s *Server) buildLoggerOptionsFromQueryParams(h *slog.JSONHandler, r *http.
 	}
 	perMessageSizeInt, err := s.tryParseAndLogIntParam(r, "message_size")
 	if err == nil {
-		optFuncs = append(optFuncs, logmaker.WithPerMessageSizeBytes(perMessageSizeInt))
+		optFuncs = append(optFuncs, logmaker.WithPerMessageSize(perMessageSizeInt))
 	}
 	burstDurationInt, err := s.tryParseAndLogIntParam(r, "burst_dur")
 	if err == nil {

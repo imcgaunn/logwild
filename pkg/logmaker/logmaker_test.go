@@ -17,7 +17,7 @@ func TestCanMakeLogMaker(t *testing.T) {
 	if mkr.PerSecondRate != 1000 {
 		t.FailNow()
 	}
-	if mkr.PerMessageSizeBytes != 2*1024 {
+	if mkr.PerMessageSize != 2*1024 {
 		t.FailNow()
 	}
 }
@@ -40,7 +40,7 @@ func TestThatLogMakerLogsToConfiguredLogger(t *testing.T) {
 	hdl := slog.NewTextHandler(f, &slog.HandlerOptions{Level: slog.LevelDebug})
 	mkr := NewLogMaker(WithLogger(slog.New(hdl)),
 		WithPerSecondRate(5000),
-		WithPerMessageSizeBytes(1024),
+		WithPerMessageSize(1024),
 		WithBurstDuration(5*time.Second))
 	go func() {
 		err := mkr.StartWriting(donech)

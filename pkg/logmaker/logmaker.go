@@ -14,10 +14,10 @@ const (
 type OptFunc func(*Opts)
 
 type Opts struct {
-	PerSecondRate       int64
-	PerMessageSizeBytes int64
-	BurstDuration       time.Duration
-	Logger              *slog.Logger
+	PerSecondRate  int64
+	PerMessageSize int64
+	BurstDuration  time.Duration
+	Logger         *slog.Logger
 }
 
 type LogMaker struct {
@@ -26,10 +26,10 @@ type LogMaker struct {
 
 func defaultOpts() Opts {
 	return Opts{
-		PerSecondRate:       1000,
-		PerMessageSizeBytes: 1024 * 2,
-		BurstDuration:       5 * time.Second,
-		Logger:              slog.Default(),
+		PerSecondRate:  1000,
+		PerMessageSize: 1024 * 2,
+		BurstDuration:  5 * time.Second,
+		Logger:         slog.Default(),
 	}
 }
 
@@ -39,9 +39,9 @@ func WithPerSecondRate(psr int64) OptFunc {
 	}
 }
 
-func WithPerMessageSizeBytes(b int64) OptFunc {
+func WithPerMessageSize(b int64) OptFunc {
 	return func(opts *Opts) {
-		opts.PerMessageSizeBytes = b
+		opts.PerMessageSize = b
 	}
 }
 
@@ -100,7 +100,7 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 				lm.Logger.Debug("processing tick", "elem", elem)
 				// actually write the log, and throw up if we can't
 				go func() {
-					sampleMessage := GetFakeSentence()
+					sampleMessage := GetFakeSentence(int(lm.PerMessageSize))
 					if err := WriteLog(lm, sampleMessage); err != nil {
 						panic(err)
 					}
@@ -114,11 +114,14 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 				tickr.Stop()
 				done <- logCount
 				// calculate effective logging rates and return them?
-				lm.Logger.Info("completed burst", "logCount", logCount)
+				timeSpentSeconds := time.Since(startTime).Seconds()
+				lm.Logger.Info("completed burst",
+					"timeSpentSeconds", fmt.Sprintf("%.2f", timeSpentSeconds),
+					"logCount", logCount)
 				effectiveRateMessages := float64(logCount) / time.Since(startTime).Seconds()
-				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSizeBytes)) / (1024 * 1024)
-				lm.Logger.Info(fmt.Sprintf("Effective logging rate: %.2f logs per second\n", effectiveRateMessages))
-				lm.Logger.Info(fmt.Sprintf("Effective logging rate (Mb/s): %.2f Mb per second\n", effectiveRateMbs))
+				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSize)) / (1024 * 1024)
+				lm.Logger.Info(fmt.Sprintf("Effective logging rate: %.2f logs per second", effectiveRateMessages))
+				lm.Logger.Info(fmt.Sprintf("Effective logging rate (Mb/s): %.2f Mb per second", effectiveRateMbs))
 				return nil
 			}
 		}
