@@ -15,6 +15,7 @@ declare -g LOGWILD_OUT_FILE="/tmp/logwild.log"
 declare -g LOGWILD_OTLP_ENDPOINT="http://${OTEL_COLLECTOR_CONTAINER_NAME}:${OTEL_COLLECTOR_GRPC_PORT}"
 declare -g LOGWILD_IMAGE_REPOSITORY="mcgaunn.com/logwild"
 declare -g LOGWILD_IMAGE_TAG="latest"
+declare -g OTEL_EXPORTER_OTLP_ENDPOINT="${LOGWILD_OTLP_ENDPOINT}"
 
 function die() {
     local msg="$1"
@@ -32,11 +33,11 @@ function stop_app() {
 function start_app() {
     local app_http_port="$1"
     printf "starting app on port %s\n" "${app_http_port}"
-    # run the container with all of my wonderful settings
-    # and detach from it, while keeping stdin open and allocating a tty
-    docker run -d -i -t \
+    # create the container with all of my wonderful settings, allocating a tty and stdin
+    docker create -i -t \
         --name="${LOGWILD_CONTAINER_NAME}" \
         -p ${app_http_port}:${LOGWILD_HTTP_PORT} \
+        -e OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_EXPORTER_OTLP_ENDPOINT}" \
         --network observe \
         --mount type=bind,src=/etc/localtime,dst=/etc/localtime,ro \
         --tmpfs=/tmp:rw,noexec,nosuid,size=128m \
@@ -52,14 +53,13 @@ function start_app() {
         run  # the actual command
     printf "started container [name=%s]\n" "${LOGWILD_CONTAINER_NAME}"
     # attach the container's in/out file descriptors
-    docker attach ${LOGWILD_CONTAINER_NAME}
+    docker start -ia ${LOGWILD_CONTAINER_NAME}
 }
 
 function cleanup() {
     printf "cleanup called\n"
     stop_app
 }
-
 
 # call cleanup on exit to remove anything we may have created
 trap 'cleanup' EXIT

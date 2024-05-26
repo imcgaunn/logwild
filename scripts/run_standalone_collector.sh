@@ -28,7 +28,7 @@ function start_collector() {
     printf "starting collector on port %s\n" "${collector_port}"
     # run the container with all of my wonderful settings
     # and detach from it, while keeping stdin open and allocating a tty
-    docker run -d -i -t \
+    docker create -i -t \
         --name=${OTEL_COLLECTOR_CONTAINER_NAME} \
         -p 44317:${OTEL_COLLECTOR_GRPC_PORT} \
         --network observe \
@@ -38,7 +38,7 @@ function start_collector() {
         docker.io/otel/opentelemetry-collector-contrib:0.95.0 || die "could not create container"
     printf "started container [name=%s]\n" "${OTEL_COLLECTOR_CONTAINER_NAME}"
     # attach the container's in/out file descriptors
-    docker attach ${OTEL_COLLECTOR_CONTAINER_NAME}
+    docker start -ia ${OTEL_COLLECTOR_CONTAINER_NAME}
 }
 
 function cleanup() {
