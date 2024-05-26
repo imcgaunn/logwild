@@ -3,7 +3,7 @@
 set shell := ["zsh", "-cu"]
 set dotenv-load := true
 
-DOCKER_REPOSITORY := "mcgaunn.com"
+DOCKER_REGISTRY := "mcgaunn.com"
 TAG := `echo ${TAG:=latest}`
 NAME := "logwild"
 GIT_COMMIT := `git describe --dirty --always`
@@ -14,7 +14,7 @@ EXTRA_RUN_ARGS := `echo ${EXTRA_RUN_ARGS:=""}`
 help :
   @echo "TAG: {{ TAG }}"
   @echo "NAME: {{ NAME }}"
-  @echo "DOCKER_REPOSITORY: {{ DOCKER_REPOSITORY }}"
+  @echo "DOCKER_REGISTRY: {{ DOCKER_REGISTRY }}"
   @echo "GIT_COMMIT: {{ GIT_COMMIT }}"
   @echo "VERSION: {{ VERSION }}"
   @just --list
@@ -27,9 +27,11 @@ build :
 build-container :
   #!/bin/zsh -exu
   echo "building docker container"
-  docker build . -t "{{ DOCKER_REPOSITORY }}/{{ NAME }}:{{ GIT_COMMIT }}"
+  docker build . -t "{{ DOCKER_REGISTRY }}/{{ NAME }}:{{ GIT_COMMIT }}"
   # also make sure latest is defined
-  docker tag "{{ DOCKER_REPOSITORY }}/{{ NAME }}:{{ GIT_COMMIT }}" latest
+  docker tag \
+  "{{ DOCKER_REGISTRY }}/{{ NAME }}:{{ GIT_COMMIT }}" \
+  "{{ DOCKER_REGISTRY }}/{{ NAME }}:latest"
 
 build-charts :
   @echo "this should build helm charts"
@@ -58,7 +60,7 @@ fmt :
   gofmt -l -s -w ./
 
 tidy :
-  rm -f go.sum; go mod tidy -compat=1.21
+  rm -f go.sum; go mod tidy -compat=1.22
 
 vet :
   go vet ./...
@@ -80,6 +82,9 @@ run-app :
     --log-burst-duration 5 \
     --log-out-file /tmp/logwild.log \
     run {{ EXTRA_RUN_ARGS }}
+
+run-app-container :
+  scripts/run_app_container.sh
 
 # run standalone openobserve service to receive traces, metrics, logs from collector
 run-observe-backend :
