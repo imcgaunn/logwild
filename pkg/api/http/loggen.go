@@ -48,7 +48,8 @@ func (s *Server) logGenHandler(w http.ResponseWriter, r *http.Request) {
 	span.AddEvent("startedWriting", trace.WithAttributes(attribute.Int("logCount", 0)))
 	logCount := <-donech
 	data := LogStatsResponse{logCount: logCount}
-	span.AddEvent("doneWriting", trace.WithAttributes(attribute.Int("logCount", logCount)))
+	span.AddEvent("doneWriting", trace.WithAttributes(attribute.Int("logCount", logCount),
+		attribute.Float64("effectiveLogsPerSecond", float64(logCount)/lm.BurstDuration.Seconds())))
 	span.SetStatus(codes.Ok, "successfully wrote logs")
 	s.JSONResponse(w, r, data)
 }
