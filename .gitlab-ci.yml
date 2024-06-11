@@ -7,6 +7,9 @@ build-docker:
   image: # using more verbose form of 'image' so entrypoint can be overridden.
     name: gcr.io/kaniko-project/executor:v1.14.0-debug
     entrypoint: [""] # script won't start without overriding this - it jumps straight to kaniko
+  only:
+    - tags
+    - main
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
