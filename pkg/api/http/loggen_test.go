@@ -27,7 +27,7 @@ func TestLogGenHandler(t *testing.T) {
 }
 
 func TestLogGenHandlerUsesParams(t *testing.T) {
-	req, err := http.NewRequest("GET", "/loggen?per_second=4000&burst_dur=1&message_size=250", nil)
+	req, err := http.NewRequest("GET", "/loggen?per_second=4000&burst_dur=1&message_size=64", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

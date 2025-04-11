@@ -14,10 +14,10 @@ const (
 type OptFunc func(*Opts)
 
 type Opts struct {
-	PerSecondRate       int64
-	PerMessageSizeBytes int64
-	BurstDuration       time.Duration
-	Logger              *slog.Logger
+	PerSecondRate  int64
+	PerMessageSize int64
+	BurstDuration  time.Duration
+	Logger         *slog.Logger
 }
 
 type LogMaker struct {
@@ -26,10 +26,10 @@ type LogMaker struct {
 
 func defaultOpts() Opts {
 	return Opts{
-		PerSecondRate:       1000,
-		PerMessageSizeBytes: 1024 * 2,
-		BurstDuration:       5 * time.Second,
-		Logger:              slog.Default(),
+		PerSecondRate:  1000,
+		PerMessageSize: 48,
+		BurstDuration:  5 * time.Second,
+		Logger:         slog.Default(),
 	}
 }
 
@@ -39,9 +39,9 @@ func WithPerSecondRate(psr int64) OptFunc {
 	}
 }
 
-func WithPerMessageSizeBytes(b int64) OptFunc {
+func WithPerMessageSize(b int64) OptFunc {
 	return func(opts *Opts) {
-		opts.PerMessageSizeBytes = b
+		opts.PerMessageSize = b
 	}
 }
 
@@ -70,14 +70,14 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	// just always use microsecond precision
 	// microseconds between ticks
 	microsPerEvent := float64(microsPerSecond) / float64(lm.PerSecondRate)
-	slog.Info("about to configure logMaker", "microsPerEvent", microsPerEvent, "perSecondRate", lm.PerSecondRate)
+	lm.Logger.Debug("about to start logMaker", "microsPerEvent", microsPerEvent, "perSecondRate", lm.PerSecondRate)
 	logsPerTick := float64(1) // how many logs need to be emitted per tick
 	var ticksPerSecond int64
 	var tickDuration time.Duration
 	if microsPerEvent < 5*float64(microsPerMilli) {
 		// if each event is < 5ms we have to do some tricks
 		// maximum resolution of go ticker is about 1ms on unix
-		slog.Info("microsPerEvent less than microsPerMilli", "microsPerMilli", microsPerMilli)
+		lm.Logger.Debug("microsPerEvent less than microsPerMilli", "microsPerMilli", microsPerMilli)
 		tickDuration = time.Duration(5 * time.Millisecond)
 	} else {
 		// if time between events is more than 1ms, don't worry about, it just
@@ -90,7 +90,7 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	startTime := time.Now()
 	logCount := 0
 
-	slog.Info("ticker settings", "microsPerEvent", microsPerEvent, "tickDuration", tickDuration, "logsPerTick", logsPerTick, "ticksPerSecond", ticksPerSecond, "logsPerSecond", lm.PerSecondRate)
+	lm.Logger.Info("ticker settings", "microsPerEvent", microsPerEvent, "tickDuration", tickDuration, "logsPerTick", logsPerTick, "ticksPerSecond", ticksPerSecond, "logsPerSecond", lm.PerSecondRate)
 
 	// write logsPerTick each tick
 	for {
@@ -100,7 +100,7 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 				lm.Logger.Debug("processing tick", "elem", elem)
 				// actually write the log, and throw up if we can't
 				go func() {
-					sampleMessage := GetFakeSentence()
+					sampleMessage := GetFakeSentence(int(lm.PerMessageSize))
 					if err := WriteLog(lm, sampleMessage); err != nil {
 						panic(err)
 					}
@@ -113,13 +113,15 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 			if time.Since(startTime) >= lm.BurstDuration {
 				tickr.Stop()
 				done <- logCount
-				lm.Logger.Debug("completed burst", "logCount", logCount)
 				// calculate effective logging rates and return them?
-				slog.Info("completed burst", "logCount", logCount)
+				timeSpentSeconds := time.Since(startTime).Seconds()
+				lm.Logger.Info("completed burst",
+					"timeSpentSeconds", fmt.Sprintf("%.2f", timeSpentSeconds),
+					"logCount", logCount)
 				effectiveRateMessages := float64(logCount) / time.Since(startTime).Seconds()
-				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSizeBytes)) / (1024 * 1024)
-				fmt.Printf("Effective logging rate: %.2f logs per second\n", effectiveRateMessages)
-				fmt.Printf("Effective logging rate (Mb/s): %.2f Mb per second\n", effectiveRateMbs)
+				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSize) * 9) / (1024 * 1024)
+				lm.Logger.Info(fmt.Sprintf("Effective logging rate: %.2f logs per second", effectiveRateMessages))
+				lm.Logger.Info(fmt.Sprintf("Effective logging rate (Mb/s): %.2f Mb per second", effectiveRateMbs))
 				return nil
 			}
 		}

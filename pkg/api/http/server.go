@@ -30,23 +30,23 @@ var (
 )
 
 type Config struct {
-	HttpClientTimeout          time.Duration `mapstructure:"http-client-timeout"`
-	HttpServerTimeout          time.Duration `mapstructure:"http-server-timeout"`
-	ServerShutdownTimeout      time.Duration `mapstructure:"server-shutdown-timeout"`
-	BackendURL                 []string      `mapstructure:"backend-url"`
-	DataPath                   string        `mapstructure:"data-path"`
-	ConfigPath                 string        `mapstructure:"config-path"`
-	CertPath                   string        `mapstructure:"cert-path"`
-	Host                       string        `mapstructure:"host"`
-	Port                       string        `mapstructure:"port"`
-	SecurePort                 string        `mapstructure:"secure-port"`
-	PortMetrics                int           `mapstructure:"port-metrics"`
-	Hostname                   string        `mapstructure:"hostname"`
-	Unhealthy                  bool          `mapstructure:"unhealthy"`
-	Unready                    bool          `mapstructure:"unready"`
-	LogwildPerSecondRate       int64         `mapstructure:"log-rate"`
-	LogwildPerMessageSizeBytes int64         `mapstructure:"log-bytes"`
-	LogwildOutFile             string        `mapstructure:"log-out-file"`
+	HttpClientTimeout     time.Duration `mapstructure:"http-client-timeout"`
+	HttpServerTimeout     time.Duration `mapstructure:"http-server-timeout"`
+	ServerShutdownTimeout time.Duration `mapstructure:"server-shutdown-timeout"`
+	BackendURL            []string      `mapstructure:"backend-url"`
+	DataPath              string        `mapstructure:"data-path"`
+	ConfigPath            string        `mapstructure:"config-path"`
+	CertPath              string        `mapstructure:"cert-path"`
+	Host                  string        `mapstructure:"host"`
+	Port                  string        `mapstructure:"port"`
+	SecurePort            string        `mapstructure:"secure-port"`
+	PortMetrics           int           `mapstructure:"port-metrics"`
+	Hostname              string        `mapstructure:"hostname"`
+	Unhealthy             bool          `mapstructure:"unhealthy"`
+	Unready               bool          `mapstructure:"unready"`
+	LogwildPerSecondRate  int64         `mapstructure:"log-rate"`
+	LogwildPerMessageSize int64         `mapstructure:"log-size"`
+	LogwildOutFile        string        `mapstructure:"log-out-file"`
 }
 
 type Server struct {

@@ -39,6 +39,6 @@ tmux send-keys -t ${SESS_NAME}:1.2 'just run-otel-collector' C-m
 # split the new pane vertically
 tmux split-window -t ${SESS_NAME}:1.2 -v
 # run logwild server in the new vertical split
-tmux send-keys -t ${SESS_NAME}:1.3 'just run-app' C-m
+tmux send-keys -t ${SESS_NAME}:1.3 'just run-app-container' C-m
 
 read "REPLY?program running in other window waiting"

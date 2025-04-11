@@ -26,7 +26,7 @@ function start_openobserve() {
     # create data directory for storing zinc data, if it doesn't exist
     mkdir -p "${LOCAL_ZINC_DATA_PATH}"
     printf "starting openobserve container\n"
-    docker run -d -i -t \
+    docker create -i -t \
         --name ${OPENOBSERVE_CONTAINER_NAME} \
         --mount type=bind,src=${LOCAL_ZINC_DATA_PATH},dst=/data \
         --mount type=bind,src=/etc/localtime,dst=/etc/localtime,ro \
@@ -38,7 +38,7 @@ function start_openobserve() {
         public.ecr.aws/zinclabs/openobserve:latest
     printf "started openobserve container [name=%s]\n" "${OPENOBSERVE_CONTAINER_NAME}"
     # attach the container's in/out file descriptors
-    docker attach ${OPENOBSERVE_CONTAINER_NAME}
+    docker start -ia ${OPENOBSERVE_CONTAINER_NAME}
 }
 
 function cleanup() {
