@@ -15,7 +15,7 @@ jobs:
         with:
           go-version: "1.22"
       - name: Install just
-        run: sudo apt-get update && sudo apt-get install -y just
+        run: sudo apt-get update && sudo apt-get install -y just zsh
       - name: Run linters
         run: |
           just fmt
@@ -32,7 +32,7 @@ jobs:
         with:
           go-version: "1.22"
       - name: Install just
-        run: sudo apt-get update && sudo apt-get install -y just
+        run: sudo apt-get update && sudo apt-get install -y just zsh
       - name: Run tests
         run: just test
 
@@ -46,6 +46,6 @@ jobs:
         with:
           go-version: "1.22"
       - name: Install just
-        run: sudo apt-get update && sudo apt-get install -y just
+        run: sudo apt-get update && sudo apt-get install -y just zsh
       - name: Build
         run: just build
