@@ -2,3 +2,4 @@ bin/
 scripts/data
 .clj-kondo
 .lsp
+repomix-output.xml
