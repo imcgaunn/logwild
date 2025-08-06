@@ -62,7 +62,7 @@ func (s *Server) createLogHandlerOrPanic() *slog.JSONHandler {
 		fp = os.Stdout
 	} else {
 		var err error
-		fp, err = os.Create(s.config.LogwildOutFile)
+		fp, err = os.OpenFile(s.config.LogwildOutFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			s.logger.Error("failed to create log file: ", err, "fileName", s.config.LogwildOutFile)
 			panic(err)
