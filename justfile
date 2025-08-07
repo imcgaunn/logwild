@@ -56,7 +56,6 @@ release-dry-run:
 
 tag-release:
   git tag -s -m {{ VERSION }} {{ VERSION }}
-  git push alert {{ VERSION }}
 
 run :
   go run -ldflags "-s -w -X mcgaunn.com/logwild/pkg/version.REVISION={{ GIT_COMMIT }}" \

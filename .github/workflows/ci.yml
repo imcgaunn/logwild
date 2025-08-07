@@ -30,6 +30,8 @@ jobs:
         run: just build
 
   release:
+    permissions:
+      contents: write
     needs: [build]
     # only run this job on tags
     if: startsWith(github.ref, 'refs/tags/')
