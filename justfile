@@ -49,6 +49,12 @@ version-set :
   echo "Version $next set in code"
 
 release:
+  goreleaser release --clean
+
+release-dry-run:
+  goreleaser release --snapshot --clean
+
+tag-release:
   git tag -s -m {{ VERSION }} {{ VERSION }}
   git push alert {{ VERSION }}
 
