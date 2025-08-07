@@ -1,6 +1,6 @@
 package version
 
 var (
-	VERSION  string = "0.1.0"
+	VERSION  string = "0.2.0"
 	REVISION string = "1"
 )
