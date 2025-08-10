@@ -3,6 +3,9 @@ package logmaker
 import (
 	"fmt"
 	"log/slog"
+	"runtime"
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -86,43 +89,64 @@ func (lm *LogMaker) StartWriting(done chan int) error {
 	}
 	ticksPerSecond = int64(time.Second / tickDuration)
 	logsPerTick = float64(lm.PerSecondRate) / float64(ticksPerSecond)
+
+	// --- Worker Pool Setup ---
+	numWorkers := runtime.NumCPU()
+	jobs := make(chan string, lm.PerSecondRate)
+	var wg sync.WaitGroup
+	var logCount int64
+
+	for w := 1; w <= numWorkers; w++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for msg := range jobs {
+				if err := WriteLog(lm, msg); err != nil {
+					lm.Logger.Error("failed to write log", "error", err)
+				} else {
+					atomic.AddInt64(&logCount, 1)
+				}
+			}
+		}()
+	}
+	// --- End Worker Pool Setup ---
+
 	tickr := time.NewTicker(tickDuration)
+	defer tickr.Stop() // Ensure ticker is stopped
+
+	burstDone := time.After(lm.BurstDuration)
 	startTime := time.Now()
-	logCount := 0
 
-	lm.Logger.Info("ticker settings", "microsPerEvent", microsPerEvent, "tickDuration", tickDuration, "logsPerTick", logsPerTick, "ticksPerSecond", ticksPerSecond, "logsPerSecond", lm.PerSecondRate)
+	lm.Logger.Info("ticker settings", "microsPerEvent", microsPerEvent, "tickDuration", tickDuration, "logsPerTick", logsPerTick, "ticksPerSecond", ticksPerSecond, "logsPerSecond", lm.PerSecondRate, "numWorkers", numWorkers)
 
-	// write logsPerTick each tick
+	// Main loop
 	for {
 		select {
-		case elem := <-tickr.C:
-			for i := 0; i < int(logsPerTick); i++ {
-				lm.Logger.Debug("processing tick", "elem", elem)
-				// actually write the log, and throw up if we can't
-				go func() {
-					sampleMessage := GetFakeSentence(int(lm.PerMessageSize))
-					if err := WriteLog(lm, sampleMessage); err != nil {
-						panic(err)
-					}
-					logCount++
-				}()
-			}
+		case <-burstDone:
+			close(jobs) // Signal workers to stop
+			wg.Wait()   // Wait for workers to finish
+			finalLogCount := atomic.LoadInt64(&logCount)
+			done <- int(finalLogCount)
 
-		default:
-			// if we have reached our time limit, we can stop. otherwise, just spin on select
-			if time.Since(startTime) >= lm.BurstDuration {
-				tickr.Stop()
-				done <- logCount
-				// calculate effective logging rates and return them?
-				timeSpentSeconds := time.Since(startTime).Seconds()
-				lm.Logger.Info("completed burst",
-					"timeSpentSeconds", fmt.Sprintf("%.2f", timeSpentSeconds),
-					"logCount", logCount)
-				effectiveRateMessages := float64(logCount) / time.Since(startTime).Seconds()
-				effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSize) * 9) / (1024 * 1024)
-				lm.Logger.Info(fmt.Sprintf("Effective logging rate: %.2f logs per second", effectiveRateMessages))
-				lm.Logger.Info(fmt.Sprintf("Effective logging rate (Mb/s): %.2f Mb per second", effectiveRateMbs))
-				return nil
+			// calculate effective logging rates and return them?
+			timeSpentSeconds := time.Since(startTime).Seconds()
+			lm.Logger.Info("completed burst",
+				"timeSpentSeconds", fmt.Sprintf("%.2f", timeSpentSeconds),
+				"logCount", finalLogCount)
+			effectiveRateMessages := float64(finalLogCount) / time.Since(startTime).Seconds()
+			effectiveRateMbs := (effectiveRateMessages * float64(lm.PerMessageSize) * 9) / (1024 * 1024)
+			lm.Logger.Info(fmt.Sprintf("Effective logging rate: %.2f logs per second", effectiveRateMessages))
+			lm.Logger.Info(fmt.Sprintf("Effective logging rate (Mb/s): %.2f Mb per second", effectiveRateMbs))
+			return nil
+		case <-tickr.C:
+			for i := 0; i < int(logsPerTick); i++ {
+				sampleMessage := GetFakeSentence(int(lm.PerMessageSize))
+				// Use a non-blocking send in case the workers are backed up
+				select {
+				case jobs <- sampleMessage:
+				default:
+					lm.Logger.Warn("log message dropped, channel full")
+				}
 			}
 		}
 	}
